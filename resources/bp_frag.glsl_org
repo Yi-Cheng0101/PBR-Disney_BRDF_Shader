@@ -1,0 +1,145 @@
+#version 330 core
+// phong fragment shader
+
+uniform vec3 lightPos;
+uniform vec3 ka;
+uniform vec3 kd;
+uniform vec3 ks;
+uniform float s;
+uniform vec3 light0Pos;
+uniform vec3 light1Pos;
+uniform vec3 light0Color;
+uniform vec3 light1Color;
+
+//varying vec3 color; // passed from the vertex shader
+varying vec3 cNor;
+varying vec3 cPos;
+
+vec3 CalculateColor(vec3 _lightPos, vec3 _lightColor, vec3 _cNor, vec3 _cPos, vec3 _ka, vec3 _kd, vec3 _ks, float _s){
+    // variable definitions
+    vec3 n, l, ca, cd, cs, c, h, e;
+    
+    // compute the normals
+    n = normalize(_cNor);
+    l = normalize(_lightPos - _cPos);
+    e = normalize(- _cPos); // e vector
+    h = normalize(l + e);
+    
+    //perform lighting computation
+    ca = ka; // final ambient color
+    cd = kd * max(0.0,dot(l,n));
+    cs = ks * pow(max(0,dot(h,n)), _s);
+    c = ca + cd + cs;
+    
+    return (_lightColor * c);
+}
+
+void main()
+{
+    // variable definitions
+    vec3 n, l, ca, cd, cs, c, h, e, color;
+    
+    // compute the normals
+    n = normalize(cNor);
+    l = normalize(lightPos - cPos);
+    e = normalize(-cPos); // e vector
+    h = normalize(l + e);
+    
+    //perform lighting computation
+    ca = ka; // final ambient color
+    cd = kd * max(0.0,dot(l,n));
+    cs = ks * pow(max(0,dot(h,n)), s);
+    c = ca + cd + cs;
+    
+    color = CalculateColor(light0Pos,light0Color,cNor,cPos,ka,kd,ks,s);
+    color += CalculateColor(light1Pos,light1Color,cNor,cPos,ka,kd,ks,s);
+    
+    gl_FragColor = vec4(color, 1.0);
+}
+
+
+
+/*
+vec3 CalcPBRLighting()
+{
+    vec3 LightIntensity = Light.Color * 
+
+    vec3 l = vec3(0.0);
+
+    if (IsDirLight) {
+        l = -PosDir - localpose0;
+    } else {
+        l = 
+        float LightToPixelDist = lenght(l);
+        l = normalize(l);
+        LightIntensity /= (LightToPixelDist * LightToPixelDist);
+    }
+
+    vec3 n = Normal;
+    vec3 v = normalize();
+    vec3 h = normalize();
+
+    float nDotH = max(dot(n, h), 0.0);
+    float vDotH = max(dot(n, h), 0.0);
+    float nDotL = max(dot(n, h), 0.0);
+    float nDotV = max(dot(n, h), 0.0);
+
+    vec3 F = schlickFresnel();
+
+    vec3 kS = F;
+
+    vec3 kD = 1.0 - kS;
+
+    vec3 SpecBRDF_nom = ggxDistribution(nDotH) * 
+                        F *
+                        geomSmith(nDotL) *
+                        geomSmith(nDotV);
+
+    float SpecBRDF_denom = 4.0 * nDotL + 0.0001;
+
+    vec3 SpecBRDF = SpecBRDF_nom / SpecBRDF_denom;
+
+    vec3 fLambert = vec3(0.0);
+
+    if (!gBRmaterial.IsMetal) {
+        fLambert = gPBRmaterial.Color;
+    }
+
+    vec3 DiffuseBRDF = kD * fLambert / PI; 
+
+    vec3 FinalColor = (DiffuseBRDF + SpecBRDF) * LightIntensity * nDotL;
+
+    return FinalColor;
+}
+
+vec3 CalcPBRDirectionalLight(vec3 Normal){
+    return CalcPBRLighting();
+}
+
+vec3 CalcPBRPointLight()
+{
+    return CalcPBRLighting();
+}
+
+vec4 CalcTotoalPBRLighting()
+{
+    vec3 Normal = normalize(Normal0);
+
+    vec3 TotalLight = CalcPBRDirectionalLight(Normal);
+
+    for (int i=0; i < gNumpointlights; i++) {
+        TotalLight += CalcPBRPointLight(gPointLightsp[i], Normal)
+    }
+
+    // HDR tone mapping 
+    TotalLight = TotalLight / (TotalLight + vec3(1.0));
+
+    // Gamma correction 
+    vec4 FinalLight = vec4(pow(Totallight, vec3(1.0/2.2)), 1.0);
+
+    return FinalLight;
+}
+
+
+
+*/
